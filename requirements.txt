@@ -1,0 +1,6 @@
+python-telegram-bot==20.*
+pydantic-settings==2.1.*
+
+# subgram sdk
+httpx
+pydantic
