@@ -42,19 +42,17 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
         product_id=settings.SUBGRAM_PRODUCT_ID,
     ):
         return await update.message.reply_html(
-            "You have access to paid functionallity!",
+            "You just paid for the service and this is your paid content: I love you!",
         )
+    
     return await show_paywall(update, context)
 
-    
 
 
 def main() -> None:
-    """Start the bot."""
-    # Create the Application and pass it your bot's token.
     application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
 
-    # on different commands - answer in Telegram
+    application.add_handler(CommandHandler("start", show_paid_functionallity, "subgram_paid"))
     application.add_handler(CommandHandler("start", start))
 
     application.add_handler(CallbackQueryHandler(show_paywall, "show_paywall"))
