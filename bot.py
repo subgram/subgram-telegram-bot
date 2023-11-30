@@ -52,7 +52,7 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
 def main() -> None:
     application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
 
-    application.add_handler(CommandHandler("start", show_paid_functionallity, "subgram_paid"))
+    application.add_handler(CommandHandler("start", show_paid_functionallity, filters.Regex("subgram_paid")))
     application.add_handler(CommandHandler("start", start))
 
     application.add_handler(CallbackQueryHandler(show_paywall, "show_paywall"))
