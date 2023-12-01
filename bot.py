@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, Update
 from telegram.ext import (
     Application, 
     CommandHandler, CallbackQueryHandler, 
@@ -28,10 +28,11 @@ async def show_paywall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         name=update.effective_user.name,
         language_code=update.effective_user.language_code,
     )
+
     return await update.effective_user.send_message(
         "You can subscribe to this bot by clicking this button:",
         reply_markup=InlineKeyboardMarkup([[
-            InlineKeyboardButton("Subscribe", url=checkout_page.checkout_url)
+            InlineKeyboardButton("Subscribe", web_app=WebAppInfo(url=checkout_page.checkout_url))
         ]]),
     )
 
