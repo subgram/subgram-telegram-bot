@@ -42,8 +42,8 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
         user_id=update.effective_user.id,
         product_id=settings.SUBGRAM_PRODUCT_ID,
     ):
-        return await update.message.reply_html(
-            "You paid for the service and this is your paid content: I love you!",
+        return await update.effective_user.send_message(
+            "You paid for the service and this is your paid content:\n\nI love you!",
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton("💸 Show paywall anyway 💸", callback_data="show_paywall")
             ]]),
