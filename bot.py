@@ -16,7 +16,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_html(
         "This bot will demonstrate how easy it is to add a subscription paywall to your Telegram bot.",
         reply_markup=InlineKeyboardMarkup([[
-            InlineKeyboardButton("Open paid functionallity", callback_data="show_paywall")
+            InlineKeyboardButton("Open paid functionallity", callback_data="show_paid_functionallity")
         ]]),
     )
 
@@ -43,7 +43,10 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
         product_id=settings.SUBGRAM_PRODUCT_ID,
     ):
         return await update.message.reply_html(
-            "You just paid for the service and this is your paid content: I love you!",
+            "You paid for the service and this is your paid content: I love you!",
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("💸 Show paywall anyway 💸", callback_data="show_paywall")
+            ]]),
         )
     
     return await show_paywall(update, context)
@@ -56,6 +59,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", show_paid_functionallity, filters.Regex("subgram_paid")))
     application.add_handler(CommandHandler("start", start))
 
+    application.add_handler(CallbackQueryHandler(show_paid_functionallity, "show_paid_functionallity"))
     application.add_handler(CallbackQueryHandler(show_paywall, "show_paywall"))
 
     # Run the bot until the user presses Ctrl-C
