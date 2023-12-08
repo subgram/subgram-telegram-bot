@@ -1,3 +1,4 @@
+import asyncio
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, Update
 from telegram.ext import (
     Application, 
@@ -54,6 +55,8 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
 
 
 def main() -> None:
+    # asyncio.create_task(subgram.run_polling())
+
     application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
 
     application.add_handler(CommandHandler("start", show_paid_functionallity, filters.Regex("subgram_paid")))
