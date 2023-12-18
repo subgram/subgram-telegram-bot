@@ -1,8 +1,15 @@
 import asyncio
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, Update, Bot
+from telegram import (
+    InlineKeyboardButton, 
+    InlineKeyboardMarkup, 
+    WebAppInfo, 
+    Update, 
+    Bot
+)
 from telegram.ext import (
     Application, 
-    CommandHandler, CallbackQueryHandler, 
+    CommandHandler, 
+    CallbackQueryHandler, 
     ContextTypes
 )
 
@@ -46,7 +53,7 @@ async def manage_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # check if a user has access to the paid functionallity
+    # check if user has paid
     if await subgram.has_access(
         user_id=update.effective_user.id,
         product_id=settings.SUBGRAM_PRODUCT_ID,
@@ -62,7 +69,7 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
 async def handle_subgram_events():
     bot = Bot(settings.TELEGRAM_TOKEN)
 
-    async for event in subgram.run_polling():
+    async for event in subgram.event_listener():
         if event.type == EventType.SUBSCRIPTION_STARTED:
             await bot.send_message(
                 chat_id=event.object.customer.telegram_id,
@@ -80,7 +87,7 @@ async def handle_subgram_events():
         if event.type == EventType.SUBSCRIPTION_CANCELLED:
             await bot.send_message(
                 chat_id=event.object.customer.telegram_id,
-                text="You just canceled subscription!",
+                text=f"You just canceled subscription! You still have access until: {event.object.status.ending_at}.",
                 reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
             )
 
@@ -99,7 +106,7 @@ async def handle_subgram_events():
             )
 
 
-async def post_init(application: Application) -> None:
+async def post_init(_: Application) -> None:
     asyncio.create_task(handle_subgram_events())
 
 
