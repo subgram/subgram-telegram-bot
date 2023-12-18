@@ -1,16 +1,23 @@
 import asyncio
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, Update, Bot
 from telegram.ext import (
     Application, 
     CommandHandler, CallbackQueryHandler, 
-    ContextTypes, filters,
+    ContextTypes
 )
 
 from config import settings
 
 from subgram import Subgram
+from subgram.constants import EventType
 
 subgram = Subgram(settings.SUBGRAM_TOKEN)
+
+
+MANAGE_SUBSCRIPTION_CALLBACK_DATA = "manage_subscription"
+MANAGE_SUBSCRIPTION_MARKUP = InlineKeyboardMarkup([[
+    InlineKeyboardButton("💸 Manage Subscription 💸", callback_data=MANAGE_SUBSCRIPTION_CALLBACK_DATA)
+]])
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -22,7 +29,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-async def show_paywall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def manage_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     checkout_page = await subgram.create_checkout_page(
         product_id=settings.SUBGRAM_PRODUCT_ID,
         user_id=update.effective_user.id,
@@ -31,39 +38,84 @@ async def show_paywall(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
     return await update.effective_user.send_message(
-        "You can subscribe to this bot by clicking this button:",
+        "You can manage your subscription by clicking this button:",
         reply_markup=InlineKeyboardMarkup([[
-            InlineKeyboardButton("Subscribe", web_app=WebAppInfo(url=checkout_page.checkout_url))
+            InlineKeyboardButton("Manage Subscription", web_app=WebAppInfo(url=checkout_page.checkout_url))
         ]]),
     )
 
 
 async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # check if a user has access to the paid functionallity
     if await subgram.has_access(
         user_id=update.effective_user.id,
         product_id=settings.SUBGRAM_PRODUCT_ID,
     ):
         return await update.effective_user.send_message(
-            "You paid for the service and this is your paid content:\n\nI love you!",
-            reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("💸 Show paywall anyway 💸", callback_data="show_paywall")
-            ]]),
+            "🎉 You paid for the service and this is your paid content:\n\n❤️❤️❤️ I love you! ❤️❤️❤️",
+            reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
         )
     
-    return await show_paywall(update, context)
+    return await manage_subscription(update, context)
 
+
+async def handle_subgram_events():
+    bot = Bot(settings.TELEGRAM_TOKEN)
+
+    async for event in subgram.run_polling():
+        if event.type == EventType.SUBSCRIPTION_STARTED:
+            await bot.send_message(
+                chat_id=event.object.customer.telegram_id,
+                text=f"Thank you for subscribing! You have access until: {event.object.status.ending_at}.",
+                reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
+            )
+
+        if event.type == EventType.SUBSCRIPTION_RENEWED:
+            await bot.send_message(
+                chat_id=event.object.customer.telegram_id,
+                text=f"You just renewed your subscription and have access until: {event.object.status.ending_at}.",
+                reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
+            )
+
+        if event.type == EventType.SUBSCRIPTION_CANCELLED:
+            await bot.send_message(
+                chat_id=event.object.customer.telegram_id,
+                text="You just canceled subscription!",
+                reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
+            )
+
+        if event.type == EventType.SUBSCRIPTION_UPGRADED:
+            await bot.send_message(
+                chat_id=event.object.customer.telegram_id,
+                text=f"You upgraded your subscription and have access until: {event.object.status.ending_at}.",
+                reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
+            )
+
+        if event.type == EventType.SUBSCRIPTION_RENEW_FAILED:
+            await bot.send_message(
+                chat_id=event.object.customer.telegram_id,
+                text=f"We failed to charge you. Please update your payment method.\nYou have access until: {event.object.status.ending_at}",
+                reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
+            )
+
+
+async def post_init(application: Application) -> None:
+    asyncio.create_task(handle_subgram_events())
 
 
 def main() -> None:
-    # asyncio.create_task(subgram.run_polling())
+    application = (
+        Application
+        .builder()
+        .post_init(post_init)
+        .token(settings.TELEGRAM_TOKEN)
+        .build()
+    )
 
-    application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
-
-    application.add_handler(CommandHandler("start", show_paid_functionallity, filters.Regex("subgram_paid")))
     application.add_handler(CommandHandler("start", start))
 
     application.add_handler(CallbackQueryHandler(show_paid_functionallity, "show_paid_functionallity"))
-    application.add_handler(CallbackQueryHandler(show_paywall, "show_paywall"))
+    application.add_handler(CallbackQueryHandler(manage_subscription, MANAGE_SUBSCRIPTION_CALLBACK_DATA))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)

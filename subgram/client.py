@@ -1,7 +1,7 @@
 import httpx
 import asyncio
 
-from subgram.schemas import CheckoutPageResponse
+from subgram.schemas import CheckoutPageResponse, Event
 
 class Subgram:
 
@@ -51,13 +51,19 @@ class Subgram:
 
 
     async def run_polling(self, timeout: int = 1):
+        event_id = 0
         async with self.client as client:
             while True:
                 response = await client.get(
                     f"/api/v1/{self.api_token}/events",
+                    params={"event_id": event_id},
                 )
                 polling_response = response.json()
-                for event in polling_response.get("result", []):
+                print("Received new polling event:", polling_response)
+
+                for event_data in polling_response.get("result", []):
+                    event = Event.model_validate(event_data)
+                    event_id = event.event_id
                     yield event
 
                 await asyncio.sleep(timeout)
