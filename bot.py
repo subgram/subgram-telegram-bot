@@ -1,15 +1,15 @@
 import asyncio
 from telegram import (
-    InlineKeyboardButton, 
-    InlineKeyboardMarkup, 
-    WebAppInfo, 
-    Update, 
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    WebAppInfo,
+    Update,
     Bot
 )
 from telegram.ext import (
-    Application, 
-    CommandHandler, 
-    CallbackQueryHandler, 
+    Application,
+    CommandHandler,
+    CallbackQueryHandler,
     ContextTypes
 )
 
@@ -62,7 +62,7 @@ async def show_paid_functionallity(update: Update, context: ContextTypes.DEFAULT
             "🎉 You paid for the service and this is your paid content:\n\n❤️❤️❤️ I love you! ❤️❤️❤️",
             reply_markup=MANAGE_SUBSCRIPTION_MARKUP,
         )
-    
+
     return await manage_subscription(update, context)
 
 
@@ -116,6 +116,12 @@ def main() -> None:
         .builder()
         .post_init(post_init)
         .token(settings.TELEGRAM_TOKEN)
+        .http_version("1.1")
+        .get_updates_http_version("1.1")
+        .read_timeout(30)
+        .write_timeout(30)
+        .connect_timeout(30)
+        .pool_timeout(30)
         .build()
     )
 

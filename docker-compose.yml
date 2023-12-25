@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  bot:
+    command: python bot.py
+    restart: always
+    build:
+      context: "."
+      dockerfile: Dockerfile
