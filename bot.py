@@ -45,7 +45,7 @@ async def manage_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     return await update.effective_user.send_message(
-        "You can manage your subscription by clicking this button:",
+        "⬇️ Click below to manage your subscription ⬇️",
         reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton("Manage Subscription", web_app=WebAppInfo(url=checkout_page.checkout_url))
         ]]),
