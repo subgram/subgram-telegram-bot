@@ -7,6 +7,7 @@ class Config(BaseSettings):
     TELEGRAM_TOKEN: str  # get yours from @botfather
     SUBGRAM_TOKEN: str   # get your from
     SUBGRAM_PRODUCT_ID: int  # product id which you are selling
+    SUBGRAM_LOCALE: str | None = None  # locale for subgram
 
 
 settings = Config()

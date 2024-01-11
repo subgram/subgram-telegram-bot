@@ -37,15 +37,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def manage_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    language_code = update.effective_user.language_code if settings.SUBGRAM_LOCALE is None else settings.SUBGRAM_LOCALE
     checkout_page = await subgram.create_checkout_page(
         product_id=settings.SUBGRAM_PRODUCT_ID,
         user_id=update.effective_user.id,
         name=update.effective_user.name,
-        language_code=update.effective_user.language_code,
+        language_code=language_code,
     )
 
+    text = (
+        f"⬇️ Click below to manage your subscription ⬇️\n\n"
+        f"— Language: {language_code}"
+    )
     return await update.effective_user.send_message(
-        "⬇️ Click below to manage your subscription ⬇️",
+        text,
         reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton("Manage Subscription", web_app=WebAppInfo(url=checkout_page.checkout_url))
         ]]),
