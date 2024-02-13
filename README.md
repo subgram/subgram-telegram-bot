@@ -3,7 +3,7 @@ A test telegram bot which shows how easy it is to integrate the subscriptions an
 
 This bot is based on `python-telegram-bot` Telegram API wrapper and [`subgram-python-sdk`](https://github.com/subgram/subgram-python-sdk) package.
 
-Start with reading `bot.py` file. Then check [`subgram-python-sdk`](https://github.com/subgram/subgram-python-sdk) README file. 
+Start with reading `bot.py` file. Then check [`subgram-python-sdk`](https://github.com/subgram/subgram-python-sdk) README file.
 
 
 ## How to run
@@ -12,7 +12,7 @@ Start with reading `bot.py` file. Then check [`subgram-python-sdk`](https://gith
 cp .env.example .env
 ```
 
-Fill `.env` file with your tokens. Use BotFather to get your `TELEGRAM_TOKEN` and [Subgram Merchant Bot](https://t.me/subgram_merchant_bot) to get `SUBGRAM_TOKEN` and `SUBGRAM_PRODUCT_ID`.
+Fill `.env` file with your tokens. To get `SUBGRAM_TOKEN` and `SUBGRAM_PRODUCT_ID` please go to [@subgram](https://t.me/subgram) for information.
 
 
 ``` bash
